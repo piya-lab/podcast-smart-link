@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { PlatformButtons } from "@/components/PlatformButtons";
 import { SocialLinks } from "@/components/SocialLinks";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const show = await getShow();
 

@@ -3,6 +3,8 @@ import { getShow } from "@/lib/show";
 import { prisma } from "@/lib/prisma";
 import { PlatformButtons } from "@/components/PlatformButtons";
 
+export const dynamic = "force-dynamic";
+
 const PAGE_SIZE = 20;
 
 export default async function EpisodesPage({

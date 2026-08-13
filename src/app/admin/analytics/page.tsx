@@ -3,6 +3,8 @@ import { getShow } from "@/lib/show";
 import { prisma } from "@/lib/prisma";
 import { ClicksChart } from "./ClicksChart";
 
+export const dynamic = "force-dynamic";
+
 const DAYS = 30;
 
 export default async function AnalyticsPage() {
