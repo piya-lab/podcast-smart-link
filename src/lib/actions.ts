@@ -39,6 +39,7 @@ export async function saveSettings(formData: FormData) {
   const slug = String(formData.get("slug") ?? "").trim();
   const rssUrl = String(formData.get("rssUrl") ?? "").trim();
   const logoUrl = String(formData.get("logoUrl") ?? "").trim() || null;
+  const tagline = String(formData.get("tagline") ?? "").trim() || null;
   const brandColor = String(formData.get("brandColor") ?? "#111111").trim();
 
   const socials = {
@@ -54,11 +55,11 @@ export async function saveSettings(formData: FormData) {
   if (existing) {
     await prisma.show.update({
       where: { id: existing.id },
-      data: { name, slug, rssUrl, logoUrl, brandColor, socials },
+      data: { name, slug, rssUrl, logoUrl, tagline, brandColor, socials },
     });
   } else {
     await prisma.show.create({
-      data: { name, slug, rssUrl, logoUrl, brandColor, socials },
+      data: { name, slug, rssUrl, logoUrl, tagline, brandColor, socials },
     });
   }
 

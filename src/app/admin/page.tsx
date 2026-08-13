@@ -94,6 +94,11 @@ export default async function AdminPage({
                 defaultValue={show?.brandColor ?? "#111111"}
               />
             </div>
+            <Field
+              label="Tagline (shown on episode pages)"
+              name="tagline"
+              defaultValue={show?.tagline ?? undefined}
+            />
             <div className="grid grid-cols-2 gap-4">
               <Field label="Instagram URL" name="instagram" defaultValue={socials.instagram} />
               <Field label="TikTok URL" name="tiktok" defaultValue={socials.tiktok} />

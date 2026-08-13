@@ -13,6 +13,14 @@ const parser = new Parser<Record<string, unknown>, { "itunes:image"?: ItunesImag
 export async function syncShowEpisodes(showId: string, rssUrl: string) {
   const feed = await parser.parseURL(rssUrl);
   const feedArtwork = feed.itunes?.image ?? feed.image?.url;
+  const feedDescription = feed.itunes?.summary ?? feed.description;
+
+  if (feedDescription) {
+    const show = await prisma.show.findUnique({ where: { id: showId }, select: { tagline: true } });
+    if (show && !show.tagline) {
+      await prisma.show.update({ where: { id: showId }, data: { tagline: feedDescription } });
+    }
+  }
 
   let created = 0;
   let updated = 0;

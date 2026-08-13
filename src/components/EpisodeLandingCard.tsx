@@ -63,6 +63,12 @@ export function EpisodeLandingCard({ episode, show }: { episode: Episode; show: 
             </div>
           )}
 
+          {show.tagline && (
+            <p className="border-t border-neutral-100 px-5 py-3 text-xs leading-relaxed text-neutral-500">
+              {show.tagline}
+            </p>
+          )}
+
           {youtubeId && (
             <div className="border-t border-neutral-100 p-4">
               <div className="aspect-video w-full overflow-hidden rounded-xl">

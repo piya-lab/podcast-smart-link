@@ -18,6 +18,7 @@ model Show {
   slug      String   @unique
   rssUrl    String
   logoUrl   String?
+  tagline   String?
   brandColor String  @default("#111111")
   socials   Json     @default("{}")
   episodes  Episode[]
