@@ -1,19 +1,10 @@
 import type { Episode, Show } from "@/generated/prisma/client";
 import { getYouTubeVideoId } from "@/lib/youtube";
-import {
-  SpotifyIcon,
-  ApplePodcastsIcon,
-  InstagramIcon,
-  XIcon,
-  TikTokIcon,
-  WebsiteIcon,
-} from "@/components/icons";
+import { SocialIconRow } from "@/components/SocialIconRow";
 
-const SOCIAL_ICONS = {
-  instagram: InstagramIcon,
-  x: XIcon,
-  tiktok: TikTokIcon,
-  website: WebsiteIcon,
+const PLATFORM_LOGOS = {
+  spotify: "/icons/spotify.svg",
+  apple: "/icons/apple-podcasts.svg",
 } as const;
 
 export function EpisodeLandingCard({ episode, show }: { episode: Episode; show: Show }) {
@@ -22,8 +13,8 @@ export function EpisodeLandingCard({ episode, show }: { episode: Episode; show: 
   const socials = (show.socials ?? {}) as Record<string, string | undefined>;
 
   const platforms = [
-    { key: "spotify", label: "Spotify", url: episode.spotifyUrl, Icon: SpotifyIcon },
-    { key: "apple", label: "Apple Podcasts", url: episode.appleUrl, Icon: ApplePodcastsIcon },
+    { key: "spotify", label: "Spotify", url: episode.spotifyUrl, logo: PLATFORM_LOGOS.spotify },
+    { key: "apple", label: "Apple Podcasts", url: episode.appleUrl, logo: PLATFORM_LOGOS.apple },
   ].filter((p) => p.url);
 
   return (
@@ -53,14 +44,15 @@ export function EpisodeLandingCard({ episode, show }: { episode: Episode; show: 
 
           {platforms.length > 0 && (
             <div className="divide-y divide-neutral-100">
-              {platforms.map(({ key, label, Icon }) => (
+              {platforms.map(({ key, label, logo }) => (
                 <a
                   key={key}
                   href={`/api/go/${episode.id}/${key}`}
                   className="flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-neutral-50"
                 >
                   <span className="flex items-center gap-3">
-                    <Icon className="h-8 w-8 shrink-0" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={logo} alt="" className="h-8 w-8 shrink-0" />
                     <span className="font-medium text-neutral-900">{label}</span>
                   </span>
                   <span className="rounded-full border border-neutral-300 px-4 py-1.5 text-sm font-semibold text-neutral-900">
@@ -91,23 +83,8 @@ export function EpisodeLandingCard({ episode, show }: { episode: Episode; show: 
             </p>
           )}
 
-          <div className="flex items-center justify-center gap-5 border-t border-neutral-100 bg-neutral-50 px-5 py-4">
-            {(Object.keys(SOCIAL_ICONS) as (keyof typeof SOCIAL_ICONS)[])
-              .filter((key) => socials[key])
-              .map((key) => {
-                const Icon = SOCIAL_ICONS[key];
-                return (
-                  <a
-                    key={key}
-                    href={socials[key]}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-neutral-500 transition-colors hover:text-neutral-900"
-                  >
-                    <Icon className="h-5 w-5" />
-                  </a>
-                );
-              })}
+          <div className="border-t border-neutral-100 bg-neutral-50 px-5 py-5">
+            <SocialIconRow socials={socials} />
           </div>
         </div>
       </div>

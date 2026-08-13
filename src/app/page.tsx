@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getShow } from "@/lib/show";
 import { prisma } from "@/lib/prisma";
 import { PlatformButtons } from "@/components/PlatformButtons";
-import { SocialLinks } from "@/components/SocialLinks";
+import { SocialIconRow } from "@/components/SocialIconRow";
 
 export const dynamic = "force-dynamic";
 
@@ -66,7 +66,7 @@ export default async function HomePage() {
         </Link>
 
         <div className="mt-8">
-          <SocialLinks socials={show.socials as Record<string, string | undefined>} />
+          <SocialIconRow socials={show.socials as Record<string, string | undefined>} />
         </div>
       </div>
     </div>

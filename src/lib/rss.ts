@@ -1,6 +1,6 @@
 import Parser from "rss-parser";
 import { prisma } from "@/lib/prisma";
-import { slugify, uniqueSlugForShow } from "@/lib/slug";
+import { slugify, uniqueSlugForShow, extractGuestName } from "@/lib/slug";
 
 type ItunesImageField = { $?: { href?: string } };
 
@@ -30,14 +30,15 @@ export async function syncShowEpisodes(showId: string, rssUrl: string) {
     });
 
     if (existing) {
-      const slug = existing.slug ?? (await uniqueSlugForShow(showId, slugify(item.title)));
+      const slug =
+        existing.slug ?? (await uniqueSlugForShow(showId, slugify(extractGuestName(item.title))));
       await prisma.episode.update({
         where: { id: existing.id },
         data: { title: item.title, description, artworkUrl, publishedAt, slug },
       });
       updated++;
     } else {
-      const slug = await uniqueSlugForShow(showId, slugify(item.title));
+      const slug = await uniqueSlugForShow(showId, slugify(extractGuestName(item.title)));
       await prisma.episode.create({
         data: {
           showId,

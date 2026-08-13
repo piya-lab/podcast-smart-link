@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { saveSettings, saveEpisodeLinks, logout } from "@/lib/actions";
 import { SaveButton } from "./SaveButton";
 import { SyncButton } from "./SyncButton";
+import { RegenerateSlugsButton } from "./RegenerateSlugsButton";
 import { EpisodeRow } from "./EpisodeRow";
 
 const PAGE_SIZE = 20;
@@ -98,6 +99,7 @@ export default async function AdminPage({
               <Field label="TikTok URL" name="tiktok" defaultValue={socials.tiktok} />
               <Field label="X / Twitter URL" name="x" defaultValue={socials.x} />
               <Field label="Website URL" name="website" defaultValue={socials.website} />
+              <Field label="Contact email" name="email" type="email" defaultValue={socials.email} />
             </div>
             <SaveButton>Save settings</SaveButton>
           </form>
@@ -107,7 +109,10 @@ export default async function AdminPage({
           <section className="rounded-xl border border-neutral-200 bg-white p-6">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-semibold text-neutral-900">Episodes</h2>
-              <SyncButton />
+              <div className="flex items-center gap-2">
+                <RegenerateSlugsButton />
+                <SyncButton />
+              </div>
             </div>
 
             <div className="mt-4">

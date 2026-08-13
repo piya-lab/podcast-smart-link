@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getShow } from "@/lib/show";
 import { syncShowEpisodes } from "@/lib/rss";
 import { COOKIE_NAME, createSessionToken } from "@/lib/auth";
-import { slugify, uniqueSlugForShow } from "@/lib/slug";
+import { slugify, uniqueSlugForShow, extractGuestName } from "@/lib/slug";
 
 export async function login(formData: FormData) {
   const password = String(formData.get("password") ?? "");
@@ -46,6 +46,7 @@ export async function saveSettings(formData: FormData) {
     tiktok: String(formData.get("tiktok") ?? "").trim() || undefined,
     x: String(formData.get("x") ?? "").trim() || undefined,
     website: String(formData.get("website") ?? "").trim() || undefined,
+    email: String(formData.get("email") ?? "").trim() || undefined,
   };
 
   const existing = await getShow();
@@ -89,6 +90,36 @@ export async function saveEpisodeLinks(episodeId: string, formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/");
   revalidatePath("/episodes");
+}
+
+export async function regenerateEpisodeSlugs() {
+  const show = await getShow();
+  if (!show) return { error: "Set up your show details first." };
+
+  const episodes = await prisma.episode.findMany({
+    where: { showId: show.id },
+    select: { id: true, title: true },
+  });
+
+  const used = new Set<string>();
+  await Promise.all(
+    episodes.map((episode) => {
+      const base = slugify(extractGuestName(episode.title)) || "episode";
+      let slug = base;
+      let n = 2;
+      while (used.has(slug)) {
+        slug = `${base}-${n}`;
+        n++;
+      }
+      used.add(slug);
+      return prisma.episode.update({ where: { id: episode.id }, data: { slug } });
+    })
+  );
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  revalidatePath("/episodes");
+  return { count: episodes.length };
 }
 
 export async function runSync() {
