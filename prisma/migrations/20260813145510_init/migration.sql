@@ -21,6 +21,7 @@ CREATE TABLE "Episode" (
     "id" TEXT NOT NULL,
     "showId" TEXT NOT NULL,
     "guid" TEXT NOT NULL,
+    "slug" TEXT,
     "title" TEXT NOT NULL,
     "description" TEXT,
     "artworkUrl" TEXT,
@@ -44,6 +45,15 @@ CREATE TABLE "ClickEvent" (
     CONSTRAINT "ClickEvent_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "PageView" (
+    "id" TEXT NOT NULL,
+    "episodeId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PageView_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Show_slug_key" ON "Show"("slug");
 
@@ -54,10 +64,19 @@ CREATE INDEX "Episode_showId_publishedAt_idx" ON "Episode"("showId", "publishedA
 CREATE UNIQUE INDEX "Episode_showId_guid_key" ON "Episode"("showId", "guid");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Episode_showId_slug_key" ON "Episode"("showId", "slug");
+
+-- CreateIndex
 CREATE INDEX "ClickEvent_episodeId_platform_createdAt_idx" ON "ClickEvent"("episodeId", "platform", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "PageView_episodeId_createdAt_idx" ON "PageView"("episodeId", "createdAt");
 
 -- AddForeignKey
 ALTER TABLE "Episode" ADD CONSTRAINT "Episode_showId_fkey" FOREIGN KEY ("showId") REFERENCES "Show"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ClickEvent" ADD CONSTRAINT "ClickEvent_episodeId_fkey" FOREIGN KEY ("episodeId") REFERENCES "Episode"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PageView" ADD CONSTRAINT "PageView_episodeId_fkey" FOREIGN KEY ("episodeId") REFERENCES "Episode"("id") ON DELETE CASCADE ON UPDATE CASCADE;

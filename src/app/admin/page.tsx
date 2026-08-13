@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { saveSettings, saveEpisodeLinks, logout } from "@/lib/actions";
 import { SaveButton } from "./SaveButton";
 import { SyncButton } from "./SyncButton";
+import { EpisodeRow } from "./EpisodeRow";
 
 const PAGE_SIZE = 20;
 
@@ -34,6 +35,24 @@ export default async function AdminPage({
   }
 
   const totalPages = Math.max(1, Math.ceil(episodeCount / PAGE_SIZE));
+
+  const episodeIds = episodes.map((e) => e.id);
+  const [clickCounts, viewCounts] = episodeIds.length
+    ? await Promise.all([
+        prisma.clickEvent.groupBy({
+          by: ["episodeId"],
+          where: { episodeId: { in: episodeIds } },
+          _count: { _all: true },
+        }),
+        prisma.pageView.groupBy({
+          by: ["episodeId"],
+          where: { episodeId: { in: episodeIds } },
+          _count: { _all: true },
+        }),
+      ])
+    : [[], []];
+  const clicksByEpisode = new Map(clickCounts.map((c) => [c.episodeId, c._count._all]));
+  const viewsByEpisode = new Map(viewCounts.map((v) => [v.episodeId, v._count._all]));
 
   return (
     <div className="min-h-screen bg-neutral-50 px-4 py-10">
@@ -91,43 +110,38 @@ export default async function AdminPage({
               <SyncButton />
             </div>
 
-            <div className="mt-4 space-y-4">
-              {episodes.length === 0 && (
+            <div className="mt-4">
+              {episodes.length === 0 ? (
                 <p className="text-sm text-neutral-500">
                   No episodes yet — click &quot;Sync new episodes&quot; to pull from the RSS feed.
                 </p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b border-neutral-200 text-xs uppercase tracking-wide text-neutral-500">
+                        <th className="pb-2 pr-3 font-medium"></th>
+                        <th className="pb-2 pr-3 font-medium">Episode</th>
+                        <th className="pb-2 pr-3 font-medium">Link</th>
+                        <th className="pb-2 pr-3 font-medium">Visits</th>
+                        <th className="pb-2 pr-3 font-medium">CTR</th>
+                        <th className="pb-2 font-medium"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {episodes.map((episode) => (
+                        <EpisodeRow
+                          key={episode.id}
+                          episode={episode}
+                          visits={viewsByEpisode.get(episode.id) ?? 0}
+                          clicks={clicksByEpisode.get(episode.id) ?? 0}
+                          saveAction={saveEpisodeLinks.bind(null, episode.id)}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
-              {episodes.map((episode) => {
-                const boundSave = saveEpisodeLinks.bind(null, episode.id);
-                return (
-                  <div key={episode.id} className="rounded-lg border border-neutral-200 p-4">
-                    <p className="font-medium text-neutral-900">{episode.title}</p>
-                    <p className="text-xs text-neutral-500">
-                      {episode.publishedAt.toDateString()}
-                    </p>
-                    <form action={boundSave} className="mt-3 grid grid-cols-3 gap-3">
-                      <Field
-                        label="Spotify link"
-                        name="spotifyUrl"
-                        defaultValue={episode.spotifyUrl ?? undefined}
-                      />
-                      <Field
-                        label="Apple Podcasts link"
-                        name="appleUrl"
-                        defaultValue={episode.appleUrl ?? undefined}
-                      />
-                      <Field
-                        label="YouTube link"
-                        name="youtubeUrl"
-                        defaultValue={episode.youtubeUrl ?? undefined}
-                      />
-                      <div className="col-span-3">
-                        <SaveButton>Save links</SaveButton>
-                      </div>
-                    </form>
-                  </div>
-                );
-              })}
             </div>
 
             {totalPages > 1 && (

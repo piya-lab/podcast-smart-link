@@ -56,7 +56,13 @@ export default async function EpisodesPage({
               className="rounded-2xl border border-neutral-200 bg-white p-5 text-left shadow-sm"
             >
               <p className="text-xs text-neutral-400">{episode.publishedAt.toDateString()}</p>
-              <p className="mt-1 font-semibold text-neutral-900">{episode.title}</p>
+              {episode.slug ? (
+                <Link href={`/${episode.slug}`} className="mt-1 block font-semibold text-neutral-900 hover:underline">
+                  {episode.title}
+                </Link>
+              ) : (
+                <p className="mt-1 font-semibold text-neutral-900">{episode.title}</p>
+              )}
               {episode.description && (
                 <p className="mt-2 line-clamp-2 text-sm text-neutral-500">{episode.description}</p>
               )}

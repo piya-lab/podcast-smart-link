@@ -30,6 +30,7 @@ model Episode {
   show        Show     @relation(fields: [showId], references: [id], onDelete: Cascade)
   showId      String
   guid        String
+  slug        String?
   title       String
   description String?
   artworkUrl  String?
@@ -38,10 +39,12 @@ model Episode {
   appleUrl    String?
   youtubeUrl  String?
   clicks      ClickEvent[]
+  views       PageView[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@unique([showId, guid])
+  @@unique([showId, slug])
   @@index([showId, publishedAt])
 }
 
@@ -59,4 +62,13 @@ model ClickEvent {
   createdAt DateTime @default(now())
 
   @@index([episodeId, platform, createdAt])
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  episode   Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  episodeId String
+  createdAt DateTime @default(now())
+
+  @@index([episodeId, createdAt])
 }

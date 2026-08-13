@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getShow } from "@/lib/show";
 import { syncShowEpisodes } from "@/lib/rss";
 import { COOKIE_NAME, createSessionToken } from "@/lib/auth";
+import { slugify, uniqueSlugForShow } from "@/lib/slug";
 
 export async function login(formData: FormData) {
   const password = String(formData.get("password") ?? "");
@@ -69,10 +70,20 @@ export async function saveEpisodeLinks(episodeId: string, formData: FormData) {
   const spotifyUrl = String(formData.get("spotifyUrl") ?? "").trim() || null;
   const appleUrl = String(formData.get("appleUrl") ?? "").trim() || null;
   const youtubeUrl = String(formData.get("youtubeUrl") ?? "").trim() || null;
+  const rawSlug = String(formData.get("slug") ?? "").trim();
+
+  const episode = await prisma.episode.findUniqueOrThrow({
+    where: { id: episodeId },
+    select: { showId: true },
+  });
+
+  const slug = rawSlug
+    ? await uniqueSlugForShow(episode.showId, slugify(rawSlug), episodeId)
+    : null;
 
   await prisma.episode.update({
     where: { id: episodeId },
-    data: { spotifyUrl, appleUrl, youtubeUrl },
+    data: { spotifyUrl, appleUrl, youtubeUrl, slug },
   });
 
   revalidatePath("/admin");
