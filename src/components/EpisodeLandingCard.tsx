@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Episode, Show } from "@/generated/prisma/client";
 import { getYouTubeVideoId } from "@/lib/youtube";
 import { SocialIconRow } from "@/components/SocialIconRow";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
 const PLATFORM_LOGOS = {
   spotify: "/icons/spotify.svg",
@@ -43,6 +44,14 @@ export function EpisodeLandingCard({ episode, show }: { episode: Episode; show: 
             <h1 className="mt-1 text-lg font-bold leading-snug text-white">{episode.title}</h1>
           </div>
 
+          {episode.audioUrl && <AudioPlayer audioUrl={episode.audioUrl} />}
+
+          {episode.description && (
+            <p className="border-t border-neutral-100 px-5 py-4 text-sm leading-relaxed text-neutral-600 line-clamp-3">
+              {episode.description}
+            </p>
+          )}
+
           {platforms.length > 0 && (
             <div className="divide-y divide-neutral-100">
               {platforms.map(({ key, label, logo }) => (
@@ -82,12 +91,6 @@ export function EpisodeLandingCard({ episode, show }: { episode: Episode; show: 
                 />
               </div>
             </div>
-          )}
-
-          {episode.description && (
-            <p className="border-t border-neutral-100 px-5 py-4 text-sm leading-relaxed text-neutral-600 line-clamp-3">
-              {episode.description}
-            </p>
           )}
 
           <div className="border-t border-neutral-100 bg-neutral-50 px-5 py-5">

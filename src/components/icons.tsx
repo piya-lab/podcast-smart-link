@@ -41,6 +41,57 @@ export function EmailIcon({ className }: IconProps) {
   );
 }
 
+export function PlayIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 4.5v15l13-7.5-13-7.5z" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function PauseIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="6" y="4.5" width="4.5" height="15" rx="1" fill="currentColor" />
+      <rect x="13.5" y="4.5" width="4.5" height="15" rx="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function SkipBackIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M5 12a7 7 0 1 1 2.2 5.1"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path d="M5 8v4h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <text x="12" y="15.5" textAnchor="middle" fontSize="7" fontWeight="700" fill="currentColor">
+        30
+      </text>
+    </svg>
+  );
+}
+
+export function SkipForwardIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M19 12a7 7 0 1 0-2.2 5.1"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path d="M19 8v4h-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <text x="12" y="15.5" textAnchor="middle" fontSize="7" fontWeight="700" fill="currentColor">
+        30
+      </text>
+    </svg>
+  );
+}
+
 export function WebsiteIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">

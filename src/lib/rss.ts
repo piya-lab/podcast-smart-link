@@ -30,6 +30,7 @@ export async function syncShowEpisodes(showId: string, rssUrl: string) {
     if (!guid || !item.title) continue;
 
     const artworkUrl = item["itunes:image"]?.$?.href ?? feedArtwork ?? null;
+    const audioUrl = item.enclosure?.url ?? null;
     const publishedAt = item.isoDate ? new Date(item.isoDate) : item.pubDate ? new Date(item.pubDate) : new Date();
     const description = item.contentSnippet ?? item.content ?? null;
 
@@ -42,7 +43,7 @@ export async function syncShowEpisodes(showId: string, rssUrl: string) {
         existing.slug ?? (await uniqueSlugForShow(showId, slugify(extractGuestName(item.title))));
       await prisma.episode.update({
         where: { id: existing.id },
-        data: { title: item.title, description, artworkUrl, publishedAt, slug },
+        data: { title: item.title, description, artworkUrl, audioUrl, publishedAt, slug },
       });
       updated++;
     } else {
@@ -55,6 +56,7 @@ export async function syncShowEpisodes(showId: string, rssUrl: string) {
           title: item.title,
           description,
           artworkUrl,
+          audioUrl,
           publishedAt,
         },
       });
