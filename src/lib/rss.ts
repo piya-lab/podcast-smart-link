@@ -1,0 +1,53 @@
+import Parser from "rss-parser";
+import { prisma } from "@/lib/prisma";
+
+type ItunesImageField = { $?: { href?: string } };
+
+const parser = new Parser<Record<string, unknown>, { "itunes:image"?: ItunesImageField }>({
+  customFields: {
+    item: ["itunes:image"],
+  },
+});
+
+export async function syncShowEpisodes(showId: string, rssUrl: string) {
+  const feed = await parser.parseURL(rssUrl);
+  const feedArtwork = feed.itunes?.image ?? feed.image?.url;
+
+  let created = 0;
+  let updated = 0;
+
+  for (const item of feed.items) {
+    const guid = item.guid ?? item.link ?? item.title;
+    if (!guid || !item.title) continue;
+
+    const artworkUrl = item["itunes:image"]?.$?.href ?? feedArtwork ?? null;
+    const publishedAt = item.isoDate ? new Date(item.isoDate) : item.pubDate ? new Date(item.pubDate) : new Date();
+    const description = item.contentSnippet ?? item.content ?? null;
+
+    const existing = await prisma.episode.findUnique({
+      where: { showId_guid: { showId, guid } },
+    });
+
+    if (existing) {
+      await prisma.episode.update({
+        where: { id: existing.id },
+        data: { title: item.title, description, artworkUrl, publishedAt },
+      });
+      updated++;
+    } else {
+      await prisma.episode.create({
+        data: {
+          showId,
+          guid,
+          title: item.title,
+          description,
+          artworkUrl,
+          publishedAt,
+        },
+      });
+      created++;
+    }
+  }
+
+  return { created, updated, total: feed.items.length };
+}

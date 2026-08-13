@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Show {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  rssUrl    String
+  logoUrl   String?
+  brandColor String  @default("#111111")
+  socials   Json     @default("{}")
+  episodes  Episode[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Episode {
+  id          String   @id @default(cuid())
+  show        Show     @relation(fields: [showId], references: [id], onDelete: Cascade)
+  showId      String
+  guid        String
+  title       String
+  description String?
+  artworkUrl  String?
+  publishedAt DateTime
+  spotifyUrl  String?
+  appleUrl    String?
+  youtubeUrl  String?
+  clicks      ClickEvent[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([showId, guid])
+  @@index([showId, publishedAt])
+}
+
+enum Platform {
+  spotify
+  apple
+  youtube
+}
+
+model ClickEvent {
+  id        String   @id @default(cuid())
+  episode   Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  episodeId String
+  platform  Platform
+  createdAt DateTime @default(now())
+
+  @@index([episodeId, platform, createdAt])
+}
