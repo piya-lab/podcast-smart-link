@@ -1,50 +1,67 @@
-# Podcast Smart Link
+# Podcast Smart Link (SKMP)
 
-A "link in bio" style page for a podcast: one URL with buttons out to Spotify, Apple Podcasts, and YouTube for every episode, plus socials and branding — with click analytics and an admin dashboard to manage it all.
+A "link in bio" style tool for a podcast: every episode gets its own shareable branded page (e.g. `/brent-gill`) with buttons out to Spotify, Apple Podcasts, and YouTube, plus socials, a tagline, and click/visit analytics — all managed from a simple admin dashboard.
 
-- **Public page**: `/` (latest episode + socials), `/episodes` (full archive, paginated)
-- **Admin**: `/admin` (settings, RSS sync, per-episode platform links), `/admin/analytics` (click totals + chart)
+**Live site:** https://listen-skmp.netlify.app
+**Code:** https://github.com/piya-lab/podcast-smart-link
+**Database:** Supabase project "SKMP - Link"
+
+## Pages
+
+- `/` — homepage: latest episode + socials
+- `/episodes` — full paginated archive, links through to each episode's page
+- `/[episodeSlug]` — each episode's own branded landing page (e.g. `/brent-gill`) — this is the link you actually share
+- `/admin` — dashboard: show settings, RSS sync, per-episode links/slugs, visits/CTR table
+- `/admin/analytics` — clicks-over-time chart + totals per episode
 
 ## Local development
 
-Node.js is installed locally at `~/.local/node` (already on your `PATH` via `.zshrc`). A local Postgres database runs via Prisma's built-in dev server.
+Node.js is installed locally at `~/.local/node` (already on `PATH` via `.zshrc`). A local Postgres database runs via Prisma's built-in dev server.
 
 ```bash
 npx prisma dev -d   # starts local Postgres in the background (only needed once per reboot)
 npm run dev          # starts the app at http://localhost:3000
 ```
 
-First time setup:
+First time setup: go to `/admin`, log in (password from `ADMIN_PASSWORD` in `.env`), fill in show settings, click **Sync new episodes**, then add Spotify/Apple/YouTube links per episode.
 
-1. Set a real `ADMIN_PASSWORD` in `.env` (it currently defaults to `changeme` — change this before sharing the URL with anyone).
-2. Go to `/admin`, log in, fill in the show name, slug, and the podcast's RSS feed URL, save.
-3. Click **Sync new episodes** to pull episodes in from the feed.
-4. Open each episode and paste in its Spotify / Apple Podcasts / YouTube links (these aren't in the RSS feed, so they're added by hand — see project plan for why).
+## Stack
 
-## Deploying it for real
+- **Next.js** (App Router, TypeScript) + **Tailwind CSS**
+- **Prisma** ORM against **Supabase Postgres**
+- Hosted on **Netlify** (auto-deploys from the `main` branch on GitHub)
 
-This app needs a real Postgres database and a host. Recommended: **Vercel** (hosting) + **Neon** (Postgres), both free to start.
+## Making changes and deploying
 
-### 1. Create a Neon database
-1. Go to [neon.com](https://neon.com) and sign up (free tier).
-2. Create a new project — any name/region is fine.
-3. Copy the connection string it gives you (starts with `postgresql://...`).
+1. Edit code locally, test with `npm run dev`.
+2. If the database schema changed (`prisma/schema.prisma`), create a migration and apply it to the **local** dev database:
+   ```bash
+   npx prisma migrate dev --name describe_the_change
+   ```
+3. Apply the same migration to **production** (Supabase). Use the **direct** connection (port 5432), not the pooled one — the pooler doesn't support the session-level features Prisma Migrate needs and will hang:
+   ```bash
+   DATABASE_URL="postgresql://postgres:<password>@db.weqyxiexxawptzwcirjg.supabase.co:5432/postgres?sslmode=require" npx prisma migrate deploy
+   ```
+4. Commit and push to `main` — Netlify picks up the push automatically and redeploys within ~1 minute.
+5. Verify on the live site after deploy.
 
-### 2. Push the schema to Neon
-In your terminal, temporarily point at the Neon database and apply migrations:
+## Environment variables
 
-```bash
-DATABASE_URL="<paste your Neon connection string>" npx prisma migrate deploy
-```
+Set in **Netlify → Site configuration → Environment variables** (scope: All scopes / Builds+Functions+Runtime):
 
-### 3. Deploy to Vercel
-1. Push this project to a GitHub repo (`git init`, `git add`, `git commit`, then create a repo on GitHub and push).
-2. Go to [vercel.com/new](https://vercel.com/new), sign up, and import that GitHub repo.
-3. Before the first deploy, add these Environment Variables in Vercel's project settings:
-   - `DATABASE_URL` — the same Neon connection string from step 1
-   - `ADMIN_PASSWORD` — a real password, not `changeme`
-   - `SESSION_SECRET` — any long random string (e.g. generate one with `openssl rand -hex 32`)
-4. Deploy. Vercel gives you a `*.vercel.app` URL — you can attach a custom domain in Vercel's project settings afterward.
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | Supabase **pooled** connection string (Transaction pooler, port 6543) — used by the running app, not migrations |
+| `ADMIN_PASSWORD` | Password for `/admin` login |
+| `SESSION_SECRET` | Long random string (e.g. `openssl rand -hex 32`) |
 
-### 4. First-run setup on the live site
-Same as local: go to `https://<your-domain>/admin`, log in, fill in show settings, sync episodes, and add platform links per episode.
+Locally, these live in `.env` and point at the local dev Postgres instead.
+
+## Setting up a fresh environment from scratch (reference)
+
+If this ever needs to be redeployed somewhere new:
+
+1. **Database**: create a free Supabase project, copy its pooled connection string (Project → Connect → Transaction pooler) for `DATABASE_URL`, and its direct connection string (port 5432) for running migrations.
+2. **Push the schema**: `DATABASE_URL="<direct connection string>" npx prisma migrate deploy`
+3. **Hosting**: create a Netlify site, import the GitHub repo, add the three environment variables above, deploy.
+4. **First-run setup**: go to `https://<your-site>/admin`, log in, fill in show settings (name, slug, RSS feed URL, logo, tagline, socials), sync episodes, add platform links.
