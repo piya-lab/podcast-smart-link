@@ -74,10 +74,14 @@ export function EpisodeLandingCard({ episode, show }: { episode: Episode; show: 
           )}
 
           {show.tagline && (
-            <p className="border-t border-neutral-100 px-5 py-3 text-center text-xs font-bold leading-relaxed text-neutral-500">
+            <p className="border-t border-neutral-100 px-5 py-3 text-center text-xs font-bold leading-relaxed text-black">
               {show.tagline}
             </p>
           )}
+
+          <div className="border-t border-neutral-100 bg-neutral-50 px-5 py-5">
+            <SocialIconRow socials={socials} />
+          </div>
 
           {youtubeId && (
             <div className="border-t border-neutral-100 p-4">
@@ -92,15 +96,11 @@ export function EpisodeLandingCard({ episode, show }: { episode: Episode; show: 
               </div>
             </div>
           )}
-
-          <div className="border-t border-neutral-100 bg-neutral-50 px-5 py-5">
-            <SocialIconRow socials={socials} />
-          </div>
         </div>
 
         <Link
           href="/episodes"
-          className="mt-4 inline-block text-sm font-medium text-white/80 underline underline-offset-4 hover:text-white"
+          className="mt-5 inline-block rounded-full bg-white px-6 py-3 text-sm font-bold text-neutral-900 shadow-lg transition-transform hover:scale-105"
         >
           Browse all episodes
         </Link>
