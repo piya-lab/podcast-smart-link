@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Episode, Show } from "@/generated/prisma/client";
 import { getYouTubeVideoId } from "@/lib/youtube";
 import { SocialIconRow } from "@/components/SocialIconRow";
@@ -30,7 +31,7 @@ export function EpisodeLandingCard({ episode, show }: { episode: Episode; show: 
       )}
       <div className="absolute inset-0 bg-black/25" />
 
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-12">
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-12">
         <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
           {bgImage && (
             // eslint-disable-next-line @next/next/no-img-element
@@ -64,7 +65,7 @@ export function EpisodeLandingCard({ episode, show }: { episode: Episode; show: 
           )}
 
           {show.tagline && (
-            <p className="border-t border-neutral-100 px-5 py-3 text-xs leading-relaxed text-neutral-500">
+            <p className="border-t border-neutral-100 px-5 py-3 text-center text-xs font-bold leading-relaxed text-neutral-500">
               {show.tagline}
             </p>
           )}
@@ -93,6 +94,13 @@ export function EpisodeLandingCard({ episode, show }: { episode: Episode; show: 
             <SocialIconRow socials={socials} />
           </div>
         </div>
+
+        <Link
+          href="/episodes"
+          className="mt-4 inline-block text-sm font-medium text-white/80 underline underline-offset-4 hover:text-white"
+        >
+          Browse all episodes
+        </Link>
       </div>
     </div>
   );
